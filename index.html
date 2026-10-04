@@ -1,0 +1,1100 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumLab Studio - Quantum Mechanics & Calculus Visualizer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for Quantum Data & Page Curve visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome for high-tech icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax for rendering complex LaTeX equations -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        qdark: '#0a0d1a',
+                        qcard: 'rgba(18, 24, 48, 0.75)',
+                        qcyan: '#00f3ff',
+                        qpurple: '#9d4edd',
+                        qmagenta: '#ff007f',
+                        qgreen: '#00ffaa'
+                    },
+                    boxShadow: {
+                        'neon-cyan': '0 0 15px rgba(0, 243, 255, 0.5)',
+                        'neon-purple': '0 0 15px rgba(157, 78, 221, 0.5)',
+                        'neon-magenta': '0 0 15px rgba(255, 0, 127, 0.5)',
+                        'neon-green': '0 0 15px rgba(0, 255, 170, 0.5)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #060913;
+            color: #e2e8f0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+        }
+        .glass-panel-purple {
+            background: rgba(20, 15, 38, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(157, 78, 221, 0.2);
+        }
+        .glow-text-cyan {
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.7);
+        }
+        .glow-text-purple {
+            text-shadow: 0 0 10px rgba(157, 78, 221, 0.7);
+        }
+        canvas {
+            touch-action: none;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #060913;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f3ff;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navigation Header -->
+    <header class="glass-panel sticky top-0 z-50 border-b border-slate-800 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-qcyan to-qpurple flex items-center justify-center shadow-neon-cyan">
+                    <i class="fa-solid fa-atom text-xl text-slate-950 animate-spin-slow"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-qcyan via-qpurple to-qmagenta">
+                        QUANTUM<span class="text-white font-light">LAB</span>
+                    </h1>
+                    <p class="text-xs text-cyan-400/70">Interactive Wave, Equation & Paradox Suite</p>
+                </div>
+            </div>
+
+            <!-- Tab Navigation Buttons -->
+            <nav class="flex flex-wrap gap-2 text-xs md:text-sm font-medium">
+                <button onclick="switchTab('lab')" id="tab-lab" class="tab-btn px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 bg-qcyan/20 text-qcyan border border-qcyan/50 shadow-neon-cyan">
+                    <i class="fa-solid fa-flask"></i><span>Physics Lab</span>
+                </button>
+                <button onclick="switchTab('theory')" id="tab-theory" class="tab-btn px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 bg-slate-800 text-slate-300 hover:text-white border border-transparent">
+                    <i class="fa-solid fa-square-root-variable"></i><span>Theory & Calculus</span>
+                </button>
+                <button onclick="switchTab('paradox')" id="tab-paradox" class="tab-btn px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 bg-slate-800 text-slate-300 hover:text-white border border-transparent">
+                    <i class="fa-solid fa-brain"></i><span>Puzzles & Paradoxes</span>
+                </button>
+                <button onclick="switchTab('sandbox')" id="tab-sandbox" class="tab-btn px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 bg-slate-800 text-slate-300 hover:text-white border border-transparent">
+                    <i class="fa-solid fa-cubes-stacked"></i><span>Circuit Sandbox</span>
+                </button>
+                <button onclick="openProModal()" class="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-qmagenta text-white font-bold shadow-neon-magenta hover:brightness-110 transition flex items-center space-x-1">
+                    <i class="fa-solid fa-crown text-amber-200"></i><span>Pro Tier</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+
+        <!-- TAB 1: INTERACTIVE PHYSICS LAB -->
+        <section id="sec-lab" class="tab-content space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Interactive Canvas Canvas -->
+                <div class="lg:col-span-2 glass-panel rounded-2xl p-4 flex flex-col space-y-4">
+                    <div class="flex justify-between items-center flex-wrap gap-2">
+                        <h2 class="text-lg font-bold text-qcyan flex items-center gap-2">
+                            <i class="fa-solid fa-wave-square"></i> Wavefunction $\psi(x)$ & Probability Density $|\psi(x)|^2$
+                        </h2>
+                        <div class="flex items-center space-x-2">
+                            <button id="btn-collapse" onclick="triggerWaveCollapse()" class="px-3 py-1.5 rounded-lg bg-qmagenta text-white font-semibold text-xs shadow-neon-magenta hover:bg-qmagenta/80 transition">
+                                <i class="fa-solid fa-compress"></i> Trigger Wave Collapse
+                            </button>
+                            <button id="btn-reset-wave" onclick="resetWaveSimulation()" class="px-3 py-1.5 rounded-lg bg-slate-700 text-slate-200 text-xs hover:bg-slate-600">
+                                <i class="fa-solid fa-rotate-right"></i> Reset Wave
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Canvas Container -->
+                    <div class="relative w-full h-[360px] bg-slate-950/80 rounded-xl border border-slate-800 overflow-hidden">
+                        <canvas id="canvas-wave" class="w-full h-full cursor-crosshair"></canvas>
+                        
+                        <!-- Measurement Banner Overlay -->
+                        <div id="collapse-status" class="absolute bottom-3 left-3 bg-slate-900/90 border border-qcyan/40 px-3 py-1.5 rounded-lg text-xs font-mono text-qcyan flex items-center gap-2 pointer-events-none">
+                            <span class="w-2 h-2 rounded-full bg-qcyan animate-ping"></span>
+                            State: Superposition (Continuous Time Evolution)
+                        </div>
+                    </div>
+
+                    <!-- Controls Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                            <label class="font-semibold text-slate-300 block mb-1">Potential Well Type</label>
+                            <select id="select-potential" onchange="updatePotentialSystem()" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-qcyan focus:outline-none focus:border-qcyan">
+                                <option value="infinite">Infinite Square Well</option>
+                                <option value="harmonic">Harmonic Oscillator</option>
+                                <option value="barrier">Quantum Tunneling Barrier</option>
+                            </select>
+                        </div>
+
+                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                            <label class="font-semibold text-slate-300 block mb-1">Energy State ($n$): <span id="val-quantum-n" class="text-qcyan">1</span></label>
+                            <input type="range" id="slider-n" min="1" max="6" value="1" step="1" oninput="updatePotentialSystem()" class="w-full accent-qcyan">
+                        </div>
+
+                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                            <label class="font-semibold text-slate-300 block mb-1">Potential Barrier Height ($V_0$): <span id="val-v0" class="text-qmagenta">50</span></label>
+                            <input type="range" id="slider-v0" min="10" max="100" value="50" oninput="updatePotentialSystem()" class="w-full accent-qmagenta">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quantum Entanglement Interactive Demonstrator -->
+                <div class="glass-panel-purple rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-qpurple flex items-center gap-2 mb-2">
+                            <i class="fa-solid fa-diagram-project"></i> Quantum Entanglement (Bell State)
+                        </h3>
+                        <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                            Two entangled qubits in state $|\Phi^+\rangle = \frac{1}{\sqrt{2}}(|00\rangle + |11\rangle)$. Measuring Particle A instantaneously dictates Particle B's spin state across any distance!
+                        </p>
+
+                        <!-- Entangled Pair Visualizer Canvas -->
+                        <div class="h-[180px] bg-slate-950/80 rounded-xl border border-purple-900/40 relative mb-4 flex items-center justify-center overflow-hidden">
+                            <canvas id="canvas-entanglement" class="w-full h-full"></canvas>
+                        </div>
+
+                        <!-- Entanglement Measurement Controls -->
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center text-xs font-mono bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                                <span class="text-purple-300">Qubit A Spin:</span>
+                                <span id="spin-a-status" class="text-qcyan font-bold">Superposition</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs font-mono bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                                <span class="text-pink-300">Qubit B Spin:</span>
+                                <span id="spin-b-status" class="text-qcyan font-bold">Superposition</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="measureEntanglement('A')" class="flex-1 py-2.5 rounded-xl bg-qcyan text-slate-950 font-bold text-xs shadow-neon-cyan hover:bg-cyan-300 transition">
+                            Measure A
+                        </button>
+                        <button onclick="measureEntanglement('B')" class="flex-1 py-2.5 rounded-xl bg-qpurple text-white font-bold text-xs shadow-neon-purple hover:bg-purple-600 transition">
+                            Measure B
+                        </button>
+                        <button onclick="resetEntanglement()" class="py-2.5 px-3 rounded-xl bg-slate-800 text-slate-300 text-xs hover:bg-slate-700">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: THEORY & CALCULUS -->
+        <section id="sec-theory" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- 1. Time-Dependent Schrödinger Equation -->
+                <div class="glass-panel rounded-2xl p-5 space-y-3 border-l-4 border-l-qcyan">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-qcyan">1. The Schrödinger Wave Equation</h3>
+                        <span class="text-xs px-2.5 py-1 rounded-full bg-cyan-950/60 text-cyan-300 border border-cyan-800">Calculus & Partial Derivatives</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        The fundamental differential equation describing how the quantum state of a physical system changes over time:
+                    </p>
+                    <div class="bg-slate-950/90 p-4 rounded-xl border border-slate-800 text-center overflow-x-auto my-2">
+                        $$\mathbf{i\hbar \frac{\partial}{\partial t} \Psi(x,t) = \left[ -\frac{\hbar^2}{2m} \frac{\partial^2}{\partial x^2} + V(x,t) \right] \Psi(x,t)}$$
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-1 bg-slate-900/50 p-3 rounded-lg">
+                        <p><strong class="text-cyan-300">$i$:</strong> Imaginary unit ($i^2 = -1$ giving wave phase oscillation).</p>
+                        <p><strong class="text-cyan-300">$\hbar$:</strong> Reduced Planck constant ($h/2\pi$).</p>
+                        <p><strong class="text-cyan-300">$\frac{\partial}{\partial t}$:</strong> Partial derivative with respect to time.</p>
+                        <p><strong class="text-cyan-300">$\frac{\partial^2}{\partial x^2}$:</strong> Second partial spatial derivative (Kinetic Energy operator).</p>
+                    </div>
+                </div>
+
+                <!-- 2. Heisenberg Uncertainty Principle -->
+                <div class="glass-panel rounded-2xl p-5 space-y-3 border-l-4 border-l-qpurple">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-qpurple">2. Heisenberg Uncertainty Principle</h3>
+                        <span class="text-xs px-2.5 py-1 rounded-full bg-purple-950/60 text-purple-300 border border-purple-800">Fourier Transforms</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Precision limits on complementary variables. Position ($x$) and Momentum ($p$) are Fourier conjugates:
+                    </p>
+                    <div class="bg-slate-950/90 p-4 rounded-xl border border-slate-800 text-center overflow-x-auto my-2">
+                        $$\mathbf{\Delta x \cdot \Delta p \ge \frac{\hbar}{2}}$$
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-1 bg-slate-900/50 p-3 rounded-lg">
+                        <p>Compressing the wavepacket in spatial domain ($\Delta x \to 0$) causes the Fourier momentum spectrum ($\Delta p$) to broaden rapidly!</p>
+                    </div>
+                </div>
+
+                <!-- 3. Dirac Notation & Quantum Vectors -->
+                <div class="glass-panel rounded-2xl p-5 space-y-3 border-l-4 border-l-qmagenta">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-qmagenta">3. Dirac Bra-Ket Notation</h3>
+                        <span class="text-xs px-2.5 py-1 rounded-full bg-pink-950/60 text-pink-300 border border-pink-800">Linear Algebra</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        State vectors live in complex Hilbert Space. Inner products represent probability amplitudes:
+                    </p>
+                    <div class="bg-slate-950/90 p-4 rounded-xl border border-slate-800 text-center overflow-x-auto my-2">
+                        $$\mathbf{|\Psi\rangle = \alpha|0\rangle + \beta|1\rangle, \quad |\alpha|^2 + |\beta|^2 = 1}$$
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-1 bg-slate-900/50 p-3 rounded-lg">
+                        <p><strong class="text-pink-300">$| \Psi \rangle$ (Ket):</strong> Column vector of complex state amplitudes.</p>
+                        <p><strong class="text-pink-300">$\langle \Psi |$ (Bra):</strong> Conjugate transpose row vector.</p>
+                    </div>
+                </div>
+
+                <!-- 4. Quantum Universality & Gates -->
+                <div class="glass-panel rounded-2xl p-5 space-y-3 border-l-4 border-l-qgreen">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-qgreen">4. Quantum Universality & Gates</h3>
+                        <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800">Unitary Matrices</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Any quantum computation can be synthesized via a universal set of unitary operators (Hadamard, CNOT, Phase):
+                    </p>
+                    <div class="bg-slate-950/90 p-4 rounded-xl border border-slate-800 text-center overflow-x-auto my-2">
+                        $$\mathbf{H = \frac{1}{\sqrt{2}}\begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}, \quad H|0\rangle = \frac{|0\rangle + |1\rangle}{\sqrt{2}}}$$
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-1 bg-slate-900/50 p-3 rounded-lg">
+                        <p>Unitary condition $U^\dagger U = I$ guarantees conservation of probability during computation!</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TAB 3: PARADOXES & INTERACTIVE PUZZLES -->
+        <section id="sec-paradox" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left Column: Puzzle Navigation -->
+                <div class="glass-panel rounded-2xl p-5 space-y-3">
+                    <h3 class="text-md font-bold text-qcyan mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-puzzle-piece"></i> Quantum Mysteries & Paradoxes
+                    </h3>
+                    <div class="space-y-2">
+                        <button onclick="loadParadox(0)" id="btn-p0" class="paradox-nav-btn w-full text-left p-3 rounded-xl bg-qcyan/20 border border-qcyan/50 text-white font-semibold text-xs flex items-center justify-between">
+                            <span>1. Black Hole Information Loss</span>
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                        <button onclick="loadParadox(1)" id="btn-p1" class="paradox-nav-btn w-full text-left p-3 rounded d-xl bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 transition flex items-center justify-between">
+            <span>2. EPR Paradox & Bell's Inequality</span>
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+          <button onclick="loadParadox(2)" id="btn-p2" class="paradox-nav-btn w-full text-left p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 transition flex items-center justify-between">
+            <span>3. Quantum Eraser & Delayed Choice</span>
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+          <button onclick="loadParadox(3)" id="btn-p3" class="paradox-nav-btn w-full text-left p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 transition flex items-center justify-between">
+            <span>4. Schrödinger's Cat & Measurement Problem</span>
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column: Selected Paradox Details & Interactive Puzzle -->
+      <div class="lg:col-span-2 space-y-4">
+        <div class="glass-panel rounded-2xl p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h2 id="paradox-title" class="text-xl font-bold text-qcyan">Black Hole Information Loss Paradox</h2>
+            <span id="paradox-status" class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">Unsolved / Interactive Puzzle</span>
+          </div>
+
+          <p id="paradox-desc" class="text-sm text-slate-300 leading-relaxed">
+            According to Quantum Mechanics, physical information cannot be destroyed (Unitary Evolution $S$-matrix). However, General Relativity predicts Hawking Radiation emitted from black holes is purely thermal, carrying no information. If a black hole evaporates completely, where does the information go?
+          </p>
+
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Core Equation At Odds</h4>
+            <div id="paradox-math" class="text-sm font-mono text-qpurple">
+              $$\rho_{\text{thermal}} = \frac{1}{Z} e^{-\beta H} \quad \text{vs} \quad |\psi(t)\rangle = U(t)|\psi(0)\rangle$$
+            </div>
+          </div>
+
+          <!-- Puzzle Interactive Area -->
+          <div class="bg-slate-950 p-5 rounded-xl border border-qcyan/30 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-brain text-qcyan"></i> Quantum Thought Experiment Puzzle
+              </h3>
+              <span class="text-xs text-slate-400">Solve to verify unitarity concept</span>
+            </div>
+
+            <p id="puzzle-q" class="text-sm text-slate-200 font-medium">
+              Which proposed resolution suggests information is encoded on the 2D event horizon boundary, matching bulk gravitational entropy?
+            </p>
+
+            <div id="puzzle-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <button onclick="checkPuzzle(0)" class="p-3 rounded-lg bg-slate-800 border border-slate-700 hover:border-qcyan text-xs text-left transition">A. Firewall Hypothesis</button>
+              <button onclick="checkPuzzle(1)" class="p-3 rounded-lg bg-slate-800 border border-slate-700 hover:border-qcyan text-xs text-left transition">B. Holographic Principle (AdS/CFT)</button>
+              <button onclick="checkPuzzle(2)" class="p-3 rounded-lg bg-slate-800 border border-slate-700 hover:border-qcyan text-xs text-left transition">C. Remnant Core Theory</button>
+              <button onclick="checkPuzzle(3)" class="p-3 rounded-lg bg-slate-800 border border-slate-700 hover:border-qcyan text-xs text-left transition">D. Information Loss is Real</button>
+            </div>
+
+            <div id="puzzle-feedback" class="hidden p-3 rounded-lg text-xs font-semibold"></div>
+
+            <div class="flex gap-2 pt-2">
+              <button onclick="toggleHint()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 flex items-center gap-1">
+                <i class="fa-regular fa-lightbulb text-amber-400"></i> Hint
+              </button>
+              <button onclick="revealSolution()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300">
+                Reveal Explanation
+              </button>
+            </div>
+
+            <p id="puzzle-hint" class="hidden text-xs text-amber-300 italic bg-amber-950/40 p-2 rounded border border-amber-800/40">
+              Hint: Think about Juan Maldacena's correspondence between gauge theories and gravity in anti-de Sitter space.
+            </p>
+
+            <div id="puzzle-solution" class="hidden text-xs text-emerald-300 bg-emerald-950/40 p-3 rounded border border-emerald-800/40 space-y-1">
+              <span class="font-bold">Full Explanation:</span>
+              <p id="puzzle-sol-text">The Holographic Principle asserts that a gravitational theory in $d+1$ dimensions is dual to a quantum field theory without gravity on its $d$-dimensional boundary. Since the boundary CFT evolves unitarily, information is preserved in black hole evaporation through non-local quantum correlations (Page Curve).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: CREATIVE SANDBOX & WAVE COLLAPSE -->
+  <section id="sec-sandbox" class="tab-content hidden space-y-6">
+    <div class="glass-panel rounded-2xl p-6 space-y-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h2 class="text-xl font-bold text-qmagenta flex items-center gap-2">
+            <i class="fa-solid fa-flask"></i> Interactive Wave Function Sandbox
+          </h2>
+          <p class="text-xs text-slate-400">Draw custom potential energy profiles $V(x)$ or state superpositions and trigger real-time quantum measurement (Wave Function Collapse).</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="resetSandbox()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 flex items-center gap-1">
+            <i class="fa-solid fa-rotate-left"></i> Reset
+          </button>
+          <button onclick="triggerCollapse()" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-qmagenta to-qpurple hover:opacity-90 text-xs font-bold text-white shadow-lg flex items-center gap-1">
+            <i class="fa-solid fa-bolt"></i> Trigger Measurement (Collapse)
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="lg:col-span-3 space-y-3">
+          <div class="relative bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
+            <canvas id="sandboxCanvas" class="w-full h-80 block cursor-crosshair"></canvas>
+            <div id="collapseBadge" class="hidden absolute top-4 right-4 bg-qmagenta text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg animate-bounce">
+              MEASURED: $|\psi|^2 \rightarrow \delta(x - x_0)$
+            </div>
+          </div>
+          <div class="flex justify-between items-center text-xs text-slate-400 px-1">
+            <span>Click & Drag on canvas to draw custom potential barrier $V(x)$</span>
+            <span id="collapsePosText">Position Eigenstate: Unmeasured</span>
+          </div>
+        </div>
+
+        <div class="space-y-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+          <h3 class="text-sm font-bold text-slate-200 border-b border-slate-800 pb-2">Sandbox Settings</h3>
+
+          <div class="space-y-2">
+            <label class="text-xs text-slate-400">Wave Packet Initial Width ($\sigma$)</label>
+            <input type="range" id="sbSigma" min="0.05" max="0.3" step="0.01" value="0.12" class="w-full accent-qmagenta" oninput="updateSandboxParams()">
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-xs text-slate-400">Initial Momentum ($k_0$)</label>
+            <input type="range" id="sbMomentum" min="-10" max="10" step="1" value="4" class="w-full accent-qmagenta" oninput="updateSandboxParams()">
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-xs text-slate-400">Preset Potentials</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="setSandboxPreset('flat')" class="p-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-slate-300">Free Space</button>
+              <button onclick="setSandboxPreset('double')" class="p-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-slate-300">Double Barrier</button>
+              <button onclick="setSandboxPreset('harmonic')" class="p-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-slate-300">Parabola</button>
+              <button onclick="setSandboxPreset('step')" class="p-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-slate-300">Potential Step</button>
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-950 rounded-lg border border-slate-800 text-xs text-slate-400 space-y-1">
+            <span class="font-bold text-qmagenta">Observer Effect:</span>
+            <p>Collapsing the wave function converts probability amplitude $|\Psi(x,t)|^2$ instantly into a localized Dirac delta position $|\psi_x\rangle$.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 5: CALCULUS & EQUATIONS ACADEMY -->
+  <section id="sec-calculus" class="tab-content hidden space-y-6">
+    <div class="glass-panel rounded-2xl p-6 space-y-6">
+      <div class="border-b border-slate-800 pb-3">
+        <h2 class="text-xl font-bold text-qcyan flex items-center gap-2">
+          <i class="fa-solid fa-graduation-cap"></i> Quantum Mathematics & Calculus Masterclass
+        </h2>
+        <p class="text-xs text-slate-400">Master the exact partial differential equations, linear operators, and Hilbert space calculus powering modern quantum theory.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Module 1 -->
+        <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 space-y-3">
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-qcyan/20 text-qcyan">Module 1</span>
+          <h3 class="text-md font-bold text-white">The Time-Dependent Schrödinger Equation</h3>
+          <div class="bg-slate-950 p-3 rounded-lg text-sm font-mono text-qpurple overflow-x-auto">
+            $$i\hbar \frac{\partial}{\partial t}\Psi(\mathbf{r},t) = \left[ -\frac{\hbar^2}{2m}\nabla^2 + V(\mathbf{r},t) \right] \Psi(\mathbf{r},t)$$
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            This linear partial differential equation governs how the quantum state of a physical system changes with time. The Hamiltonian operator $\hat{H} = -\frac{\hbar^2}{2m}\nabla^2 + V$ represents total energy (kinetic + potential).
+          </p>
+        </div>
+
+        <!-- Module 2 -->
+        <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 space-y-3">
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-qpurple/20 text-qpurple">Module 2</span>
+          <h3 class="text-md font-bold text-white">Heisenberg Uncertainty Principle</h3>
+          <div class="bg-slate-950 p-3 rounded-lg text-sm font-mono text-qcyan overflow-x-auto">
+            $$\sigma_x \sigma_p \ge \frac{\hbar}{2} \quad \Longleftrightarrow \quad [\hat{x}, \hat{p}] = i\hbar$$
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Derived from the non-commutativity of position and momentum operators. In Fourier transform terms, a localized spatial wave packet requires a broad range of momentum frequencies.
+          </p>
+        </div>
+
+        <!-- Module 3 -->
+        <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 space-y-3">
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-qmagenta/20 text-qmagenta">Module 3</span>
+          <h3 class="text-md font-bold text-white">Probability Density & Current Continuity</h3>
+          <div class="bg-slate-950 p-3 rounded-lg text-sm font-mono text-emerald-400 overflow-x-auto">
+            $$\frac{\partial \rho}{\partial t} + \mathbf{\nabla} \cdot \mathbf{J} = 0, \quad \mathbf{J} = \frac{\hbar}{2mi}\left(\Psi^* \mathbf{\nabla}\Psi - \Psi \mathbf{\nabla}\Psi^*\right)$$
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Ensures global probability conservation $\int |\Psi|^2 dV = 1$. The probability flux density $\mathbf{J}$ tracks how wave probability flows through space.
+          </p>
+        </div>
+
+        <!-- Module 4 -->
+        <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 space-y-3">
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">Module 4</span>
+          <h3 class="text-md font-bold text-white">Quantum Entanglement & Bell State Matrix</h3>
+          <div class="bg-slate-950 p-3 rounded-lg text-sm font-mono text-amber-300 overflow-x-auto">
+            $$|\Phi^+\rangle = \frac{1}{\sqrt{2}}(|00\rangle + |11\rangle), \quad E(\rho) = -\text{Tr}(\rho \log_2 \rho)$$
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Entangled bipartite states cannot be factored into product states $|\psi_A\rangle \otimes |\psi_B\rangle$. von Neumann entropy quantifies degree of quantum non-locality.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- PRO / MONETIZATION MODAL -->
+<div id="proModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+  <div class="glass-panel max-w-lg w-full rounded-2xl p-6 border border-qcyan/40 space-y-6 relative shadow-2xl">
+    <button onclick="closeProModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <div class="text-center space-y-2">
+      <span class="px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-qcyan to-qpurple text-white uppercase tracking-widest">QuantumLab Pro</span>
+      <h2 class="text-2xl font-extrabold text-white">Unlock Advanced Research Suite</h2>
+      <p class="text-xs text-slate-300">Upgrade your interactive workspace to access enterprise-grade physics features.</p>
+    </div>
+
+    <div class="space-y-3 text-xs">
+      <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+        <i class="fa-solid fa-circle-check text-qcyan text-md mt-0.5"></i>
+        <div>
+          <span class="font-bold text-white">Multi-Qubit Entanglement Sandbox</span>
+          <p class="text-slate-400">Simulate up to 16 qubits with GHZ/W-state generation and noise channels.</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+        <i class="fa-solid fa-circle-check text-qpurple text-md mt-0.5"></i>
+        <div>
+          <span class="font-bold text-white">2D & 3D Schrödinger Solvers</span>
+          <p class="text-slate-400">Export high-resolution WebGL animations and mathematical LaTeX reports.</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+        <i class="fa-solid fa-circle-check text-qmagenta text-md mt-0.5"></i>
+        <div>
+          <span class="font-bold text-white">Certificate of Completion</span>
+          <p class="text-slate-400">Get accredited certificates after solving all quantum calculus paradox puzzles.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 rounded-xl bg-gradient-to-r from-qcyan/10 via-qpurple/10 to-qmagenta/10 border border-qcyan/20 text-center space-y-3">
+      <div class="text-2xl font-black text-white">$4.99 <span class="text-xs font-normal text-slate-400">/ month</span></div>
+      <button onclick="simulateSubscription()" class="w-full py-3 rounded-xl bg-gradient-to-r from-qcyan via-qpurple to-qmagenta hover:opacity-90 font-bold text-white text-sm shadow-lg transition">
+        Activate Pro Membership
+      </button>
+      <p class="text-[10px] text-slate-500">Includes 7-day free trial. Cancel anytime with one click.</p>
+    </div>
+  </div>
+</div>
+
+<!-- JAVASCRIPT LOGIC -->
+<script>
+  // Global State
+  let currentTab = 'sim';
+  let isPro = false;
+  let animId = null;
+
+  // Wave Simulation Parameters
+  let potType = 'harmonic';
+  let barrierHeight = 5;
+  let wavePacketPos = 0.3;
+  let wavePacketSpeed = 3;
+  let simTime = 0;
+  const N = 200;
+  let psiReal = new Float64Array(N);
+  let psiImag = new Float64Array(N);
+  let V = new Float64Array(N);
+
+  // Bloch Sphere State
+  let theta = Math.PI / 2;
+  let phi = 0;
+
+  // Circuit Gates State
+  let circuitGates = [];
+
+  // Paradox Data
+  const paradoxes = [
+    {
+      title: "Black Hole Information Loss Paradox",
+      status: "Unsolved / Interactive Puzzle",
+      desc: "According to Quantum Mechanics, physical information cannot be destroyed (Unitary Evolution). However, General Relativity predicts Hawking Radiation emitted from black holes is purely thermal, carrying no information. If a black hole evaporates completely, where does the information go?",
+      math: "$$\\rho_{\\text{thermal}} = \\frac{1}{Z} e^{-\\beta H} \\quad \\text{vs} \\quad |\\psi(t)\\rangle = U(t)|\\psi(0)\\rangle$$",
+      q: "Which proposed resolution suggests information is encoded on the 2D event horizon boundary, matching bulk gravitational entropy?",
+      opts: ["A. Firewall Hypothesis", "B. Holographic Principle (AdS/CFT)", "C. Remnant Core Theory", "D. Information Loss is Real"],
+      correct: 1,
+      hint: "Hint: Think about Juan Maldacena's correspondence between gauge theories and gravity in anti-de Sitter space.",
+      sol: "The Holographic Principle asserts that a gravitational theory in d+1 dimensions is dual to a quantum field theory without gravity on its d-dimensional boundary. Since the boundary CFT evolves unitarily, information is preserved."
+    },
+    {
+      title: "EPR Paradox & Bell's Inequality",
+      status: "Solved (Aspect/Clauser/Zeilinger Nobel 2022)",
+      desc: "Einstein, Podolsky, and Rosen argued quantum mechanics was incomplete because entangled particles seem to influence each other instantaneously ('spooky action at a distance'). John Bell proved local hidden variable theories satisfy mathematical bounds violated by quantum mechanics.",
+      math: "|E(a,b) - E(a,b')| + |E(a',b) + E(a',b')| \\le 2 \\quad \\text{(Quantum limit: } 2\\sqrt{2}\\text{)}$$",
+      q: "What fundamental assumption about physics was experimentally disproven by Bell Test experiments?",
+      opts: ["A. Conservation of Energy", "B. Local Realism", "C. Wave-Particle Duality", "D. General Relativity"],
+      correct: 1,
+      hint: "Hint: It is the combination of locality (no faster-than-light signals) and realism (definite values prior to measurement).",
+      sol: "Bell's theorem shows that no physical theory of local hidden variables can ever reproduce all the predictions of quantum mechanics. Nature is non-local or non-real."
+    },
+    {
+      title: "Quantum Eraser & Delayed Choice",
+      status: "Solved / Mind-Bending",
+      desc: "In a double-slit experiment, tagging which slit a photon went through destroys interference. But if you 'erase' the tag AFTER the photon has passed through the slits, the interference pattern re-emerges in correlated sub-ensembles!",
+      math: "$$P(x) = |\\psi_1(x) + \\psi_2(x)|^2 \\quad \\text{when path marker is entangled}$$",
+      q: "Does the delayed-choice quantum eraser allow sending messages into the past?",
+      opts: ["A. Yes, using quantum entanglement", "B. No, correlation requires classical coincidence counting", "C. Yes, via faster-than-light photons", "D. Only in curved spacetime"],
+      correct: 1,
+      hint: "Hint: Can you read the interference pattern without receiving classical data from the second detector?",
+      sol: "No FTL or backward time communication is possible because the total photon distribution looks completely random until sorted using classical coincidence data from the marker detector."
+    },
+    {
+      title: "Schrödinger's Cat & Measurement Problem",
+      status: "Interpreted (Copenhagen, Many-Worlds, GRW)",
+      desc: "A cat inside a box is entangled with a radioactive atom. Until observed, quantum mechanics describes the cat in a linear superposition state: |Alive⟩ + |Dead⟩. What constitutes an 'observation' that triggers wave collapse?",
+      math: "$$\vert{}\\Psi\\rangle = \\frac{1}{\\sqrt{2}}\\left(\vert{}\\text{Decayed}\\rangle\vert{}\\text{Dead}\\rangle + \vert{}\\text{Undecayed}\\rangle\vert{}\\text{Alive}\\rangle\\right)$$",
+      q: "In Everett's Many-Worlds Interpretation, what happens during wave function measurement?",
+      opts: ["A. The wave function physical collapses", "B. Consciousness forces a choice", "C. Universe decoheres into non-interacting parallel branches", "D. Virtual particles absorb the superposition"],
+      correct: 2,
+      hint: "Hint: There is no collapse in Everettian quantum mechanics.",
+      sol: "Many-Worlds posits that the universal wave function never collapses; instead, measurement causes environmental decoherence, splitting the world into orthogonal, non-interfering parallel branches."
+    }
+  ];
+
+  let currentParadoxIdx = 0;
+
+  // Initialize App
+  window.addEventListener('DOMContentLoaded', () => {
+    switchTab('sim');
+    initSimulation();
+    initBlochSphere();
+    loadParadox(0);
+    initSandbox();
+  });
+
+  // Tab Navigation
+  function switchTab(tabId) {
+    currentTab = tabId;
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+
+    document.getElementById(`tab-${tabId}`).classList.add('active');
+    document.getElementById(`sec-${tabId}`).classList.remove('hidden');
+
+    if (tabId === 'sim') requestAnimationFrame(renderSimulation);
+    if (tabId === 'circuit') renderBlochSphere();
+    if (tabId === 'sandbox') requestAnimationFrame(renderSandbox);
+
+    if (window.MathJax) MathJax.typesetPromise();
+  }
+
+  // --- SIMULATION MODULE ---
+  function initSimulation() {
+    for (let i = 0; i < N; i++) {
+      let x = i / N;
+      // Potential calculation
+      if (potType === 'harmonic') {
+        V[i] = barrierHeight * 50 * Math.pow(x - 0.5, 2);
+      } else if (potType === 'tunnel') {
+        V[i] = (x > 0.45 && x < 0.55) ? barrierHeight * 5 : 0;
+      } else if (potType === 'infinite') {
+        V[i] = (i < 5 || i > N - 6) ? 1000 : 0;
+      }
+
+      // Initial Gaussian Wave Packet
+      let x0 = wavePacketPos;
+      let sigma = 0.05;
+      let k0 = wavePacketSpeed * 10;
+      let norm = Math.exp(-Math.pow(x - x0, 2) / (2 * sigma * sigma));
+      psiReal[i] = norm * Math.cos(k0 * x);
+      psiImag[i] = norm * Math.sin(k0 * x);
+    }
+  }
+
+  function updateSimParams() {
+    potType = document.getElementById('potSelect').value;
+    barrierHeight = parseFloat(document.getElementById('barrierSlider').value);
+    wavePacketSpeed = parseFloat(document.getElementById('speedSlider').value);
+    document.getElementById('barrierVal').innerText = barrierHeight;
+    document.getElementById('speedVal').innerText = wavePacketSpeed;
+    initSimulation();
+  }
+
+  function renderSimulation() {
+    if (currentTab !== 'sim') return;
+
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width = canvas.parentElement.clientWidth;
+    const h = canvas.height = canvas.parentElement.clientHeight || 320;
+
+    // Time Evolution Step (Crank-Nicolson / Finite Difference approximation)
+    let dt = 0.0005;
+    let dx = 1 / N;
+    for (let step = 0; step < 5; step++) {
+      for (let i = 1; i < N - 1; i++) {
+        let d2Real = (psiReal[i+1] - 2*psiReal[i] + psiReal[i-1]) / (dx * dx);
+        let d2Imag = (psiImag[i+1] - 2*psiImag[i] + psiImag[i-1]) / (dx * dx);
+
+        psiReal[i] -= dt * (-0.5 * d2Imag + V[i] * psiImag[i]);
+        psiImag[i] += dt * (-0.5 * d2Real + V[i] * psiReal[i]);
+      }
+    }
+
+    // Clear Screen
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(0, 0, w, h);
+
+    // Draw Potential V(x)
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < N; i++) {
+      let x = (i / N) * w;
+      let y = h - (V[i] * 3) - 20;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Draw Wave Function Real, Imag, and Probability |Ψ|²
+    ctx.lineWidth = 2.5;
+
+    // Probability Density Filled Gradient
+    let grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, 'rgba(6, 182, 212, 0.5)');
+    grad.addColorStop(1, 'rgba(6, 182, 212, 0.0)');
+
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    let totalProb = 0;
+
+    for (let i = 0; i < N; i++) {
+      let x = (i / N) * w;
+      let prob = (psiReal[i] * psiReal[i] + psiImag[i] * psiImag[i]);
+      totalProb += prob;
+      let y = h - (prob * (h * 0.6)) - 20;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(w, h);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Draw Real Component Line (Cyan)
+    ctx.beginPath();
+    ctx.strokeStyle = '#06b6d4';
+    for (let i = 0; i < N; i++) {
+      let x = (i / N) * w;
+      let y = h/2 - (psiReal[i] * (h * 0.3));
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Update Telemetry
+    document.getElementById('m-prob').innerText = (totalProb * 0.01).toFixed(4);
+    document.getElementById('m-e').innerText = (0.5 * Math.pow(wavePacketSpeed, 2) + barrierHeight*0.1).toFixed(2) + " eV";
+
+    requestAnimationFrame(renderSimulation);
+  }
+
+  // --- BLOCH SPHERES & QUANTUM CIRCUITS ---
+  function initBlochSphere() {
+    renderBlochSphere();
+  }
+
+  function renderBlochSphere() {
+    const canvas = document.getElementById('blochCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width = canvas.parentElement.clientWidth;
+    const h = canvas.height = canvas.parentElement.clientHeight || 260;
+    const cx = w / 2;
+    const cy = h / 2;
+    const r = Math.min(w, h) * 0.35;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Draw Sphere Outline
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Draw Equator Ellipse
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, r, r * 0.3, 0, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)';
+    ctx.stroke();
+
+    // Draw Axes
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r - 10); ctx.lineTo(cx, cy + r + 10); // Z-axis
+    ctx.moveTo(cx - r - 10, cy); ctx.lineTo(cx + r + 10, cy); // X-axis
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)';
+    ctx.stroke();
+
+    // Labels
+    ctx.fillStyle = '#06b6d4';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('|0⟩', cx - 8, cy - r - 15);
+    ctx.fillText('|1⟩', cx - 8, cy + r + 25);
+
+    // Calculate Vector Coordinates
+    let vx = r * Math.sin(theta) * Math.cos(phi);
+    let vy = r * Math.sin(theta) * Math.sin(phi);
+    let vz = r * Math.cos(theta);
+
+    let px = cx + vx;
+    let py = cy - vz + vy * 0.3; // Perspective projection
+
+    // Draw Vector
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(px, py);
+    ctx.strokeStyle = '#a855f7';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Draw Tip Circle
+    ctx.beginPath();
+    ctx.arc(px, py, 6, 0, 2 * Math.PI);
+    ctx.fillStyle = '#ec4899';
+    ctx.fill();
+
+    // Update Vector Text
+    let alpha = Math.cos(theta / 2).toFixed(2);
+    let betaVal = Math.sin(theta / 2).toFixed(2);
+    document.getElementById('stateVectorText').innerText = `$|\\psi\\rangle = ${alpha}|0\\rangle + ${betaVal}e^{i\\phi}|1\\rangle$`;
+    if (window.MathJax) MathJax.typesetPromise();
+  }
+
+  function applyGate(gate) {
+    circuitGates.push(gate);
+    if (gate === 'H') {
+      theta = Math.PI / 2;
+      phi = 0;
+    } else if (gate === 'X') {
+      theta = Math.PI - theta;
+    } else if (gate === 'Z') {
+      phi += Math.PI;
+    } else if (gate === 'S') {
+      phi += Math.PI / 2;
+    }
+    renderCircuitUI();
+    renderBlochSphere();
+  }
+
+  function resetCircuit() {
+    circuitGates = [];
+    theta = 0; // |0> state
+    phi = 0;
+    renderCircuitUI();
+    renderBlochSphere();
+  }
+
+  function renderCircuitUI() {
+    const wire = document.getElementById('circuitWire');
+    wire.innerHTML = '<span class="text-xs font-mono text-qcyan bg-slate-900 px-2 py-1 rounded">Qubit 0: |0⟩</span>';
+    circuitGates.forEach(g => {
+      let tag = document.createElement('div');
+      tag.className = 'px-3 py-1 bg-gradient-to-br from-qcyan to-qpurple text-white font-bold rounded shadow text-xs';
+      tag.innerText = g;
+      wire.appendChild(tag);
+    });
+  }
+
+  // --- PARADOXES & INTERACTIVE PUZZLES ---
+  function loadParadox(idx) {
+    currentParadoxIdx = idx;
+    let p = paradoxes[idx];
+
+    document.querySelectorAll('.paradox-nav-btn').forEach((btn, i) => {
+      if (i === idx) btn.className = "paradox-nav-btn w-full text-left p-3 rounded-xl bg-qcyan/20 border border-qcyan text-white transition flex items-center justify-between";
+      else btn.className = "paradox-nav-btn w-full text-left p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 transition flex items-center justify-between";
+    });
+
+    document.getElementById('paradox-title').innerText = p.title;
+    document.getElementById('paradox-status').innerText = p.status;
+    document.getElementById('paradox-desc').innerText = p.desc;
+    document.getElementById('paradox-math').innerText = p.math;
+    document.getElementById('puzzle-q').innerText = p.q;
+
+    let optsContainer = document.getElementById('puzzle-options');
+    optsContainer.innerHTML = '';
+    p.opts.forEach((opt, oIdx) => {
+      let btn = document.createElement('button');
+      btn.className = 'p-3 rounded-lg bg-slate-800 border border-slate-700 hover:border-qcyan text-xs text-left transition';
+      btn.innerText = opt;
+      btn.onclick = () => checkPuzzle(oIdx);
+      optsContainer.appendChild(btn);
+    });
+
+    document.getElementById('puzzle-feedback').classList.add('hidden');
+    document.getElementById('puzzle-hint').classList.add('hidden');
+    document.getElementById('puzzle-solution').classList.add('hidden');
+    document.getElementById('puzzle-hint').innerText = p.hint;
+    document.getElementById('puzzle-sol-text').innerText = p.sol;
+
+    if (window.MathJax) MathJax.typesetPromise();
+  }
+
+  function checkPuzzle(optIdx) {
+    let p = paradoxes[currentParadoxIdx];
+    let fb = document.getElementById('puzzle-feedback');
+    fb.classList.remove('hidden');
+
+    if (optIdx === p.correct) {
+      fb.className = 'p-3 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+      fb.innerText = 'Correct! You solved the paradox puzzle concept correctly!';
+    } else {
+      fb.className = 'p-3 rounded-lg text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/40';
+      fb.innerText = 'Incorrect answer. Try again or check the hint below!';
+    }
+  }
+
+  function toggleHint() {
+    document.getElementById('puzzle-hint').classList.toggle('hidden');
+  }
+
+  function revealSolution() {
+    document.getElementById('puzzle-solution').classList.remove('hidden');
+  }
+
+  // --- CREATIVE SANDBOX & WAVE COLLAPSE ---
+  let sbV = new Float64Array(N);
+  let sbPsiReal = new Float64Array(N);
+  let sbPsiImag = new Float64Array(N);
+  let sbSigma = 0.12;
+  let sbK0 = 4;
+  let isMeasured = false;
+  let measuredPos = null;
+
+  function initSandbox() {
+    setSandboxPreset('flat');
+  }
+
+  function updateSandboxParams() {
+    sbSigma = parseFloat(document.getElementById('sbSigma').value);
+    sbK0 = parseFloat(document.getElementById('sbMomentum').value);
+    resetSandbox();
+  }
+
+  function setSandboxPreset(type) {
+    isMeasured = false;
+    document.getElementById('collapseBadge').classList.add('hidden');
+    document.getElementById('collapsePosText').innerText = "Position Eigenstate: Unmeasured";
+
+    for (let i = 0; i < N; i++) {
+      let x = i / N;
+      if (type === 'flat') sbV[i] = 0;
+      else if (type === 'double') sbV[i] = ((x > 0.4 && x < 0.45) || (x > 0.55 && x < 0.6)) ? 15 : 0;
+      else if (type === 'harmonic') sbV[i] = 40 * Math.pow(x - 0.5, 2);
+      else if (type === 'step') sbV[i] = (x > 0.5) ? 10 : 0;
+
+      let norm = Math.exp(-Math.pow(x - 0.3, 2) / (2 * sbSigma * sbSigma));
+      sbPsiReal[i] = norm * Math.cos(sbK0 * 10 * x);
+      sbPsiImag[i] = norm * Math.sin(sbK0 * 10 * x);
+    }
+  }
+
+  function resetSandbox() {
+    setSandboxPreset('flat');
+  }
+
+  function triggerCollapse() {
+    isMeasured = true;
+    // Calculate cumulative probability
+    let probs = new Float64Array(N);
+    let total = 0;
+    for (let i = 0; i < N; i++) {
+      probs[i] = sbPsiReal[i]*sbPsiReal[i] + sbPsiImag[i]*sbPsiImag[i];
+      total += probs[i];
+    }
+
+    // Pick random position based on |Psi|^2 probability distribution
+    let rand = Math.random() * total;
+    let cum = 0;
+    measuredPos = N / 2;
+    for (let i = 0; i < N; i++) {
+      cum += probs[i];
+      if (cum >= rand) {
+        measuredPos = i;
+        break;
+      }
+    }
+
+    // Collapse state into narrow Gaussian delta spike
+    for (let i = 0; i < N; i++) {
+      let delta = Math.exp(-Math.pow(i - measuredPos, 2) / 2);
+      sbPsiReal[i] = delta * 3;
+      sbPsiImag[i] = 0;
+    }
+
+    document.getElementById('collapseBadge').classList.remove('hidden');
+    document.getElementById('collapsePosText').innerText = `Position Eigenstate: Measured at x = ${(measuredPos / N).toFixed(3)}`;
+  }
+
+  function renderSandbox() {
+    if (currentTab !== 'sandbox') return;
+
+    const canvas = document.getElementById('sandboxCanvas');
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width = canvas.parentElement.clientWidth;
+    const h = canvas.height = canvas.parentElement.clientHeight || 320;
+
+    // Time evolution if not measured
+    if (!isMeasured) {
+      let dt = 0.0004;
+      let dx = 1 / N;
+      for (let i = 1; i < N - 1; i++) {
+        let d2R = (sbPsiReal[i+1] - 2*sbPsiReal[i] + sbPsiReal[i-1]) / (dx * dx);
+        let d2I = (sbPsiImag[i+1] - 2*sbPsiImag[i] + sbPsiImag[i-1]) / (dx * dx);
+        sbPsiReal[i] -= dt * (-0.5 * d2I + sbV[i] * sbPsiImag[i]);
+        sbPsiImag[i] += dt * (-0.5 * d2R + sbV[i] * sbPsiReal[i]);
+      }
+    }
+
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(0, 0, w, h);
+
+    // Draw Potential V(x)
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < N; i++) {
+      let x = (i / N) * w;
+      let y = h - (sbV[i] * 10) - 20;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Draw Probability Density
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    for (let i = 0; i < N; i++) {
+      let x = (i / N) * w;
+      let prob = (sbPsiReal[i] * sbPsiReal[i] + sbPsiImag[i] * sbPsiImag[i]);
+      let y = h - (prob * 40) - 20;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(w, h);
+    ctx.fillStyle = 'rgba(236, 72, 153, 0.35)';
+    ctx.fill();
+
+    // Draw Real Part Wave
+    ctx.beginPath();
+    ctx.strokeStyle = '#ec4899';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < N; i++) {
+      let x = (i / N) * w;
+      let y = h / 2 - (sbPsiReal[i] * 25);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    requestAnimationFrame(renderSandbox);
+  }
+
+  // --- PRO MONETIZATION MODAL ---
+  function openProModal() {
+    document.getElementById('proModal').classList.remove('hidden');
+  }
+
+  function closeProModal() {
+    document.getElementById('proModal').classList.add('hidden');
+  }
+
+  function simulateSubscription() {
+    isPro = true;
+    document.getElementById('proBadgeNav').innerText = 'PRO ACTIVATED';
+    document.getElementById('proBadgeNav').className = 'px-3 py-1 rounded-full text-xs font-extrabold bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg';
+    closeProModal();
+    alert('Congratulations! QuantumLab Pro Membership Activated successfully.');
+  }
+</script>
+</body>
+</html>
